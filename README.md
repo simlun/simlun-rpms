@@ -2,6 +2,8 @@
 
 RPMs built by me because they were missing in CentOS 8.
 
+Browse the repo at https://bintray.com/simlun/centos-8
+
 
 ## Install repo
 
