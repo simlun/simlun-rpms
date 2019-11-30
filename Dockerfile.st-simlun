@@ -1,0 +1,18 @@
+FROM centos:8
+RUN dnf -y install epel-release
+RUN dnf -y install 'dnf-command(config-manager)'
+RUN dnf config-manager --set-enabled PowerTools
+RUN dnf -y install gcc rpm-build rpm-devel rpmlint make bash diffutils patch rpmdevtools git
+
+RUN rpmdev-setuptree
+
+WORKDIR /root
+
+RUN cd rpmbuild/SOURCES; curl -O http://dl.suckless.org/st/st-0.8.1.tar.gz
+RUN git clone https://github.com/simlun/rpms-st.git rpmbuild/SPECS/st-simlun
+RUN dnf -y install libX11-devel libXext-devel libXft-devel
+RUN curl -O https://ftp-stud.hs-esslingen.de/pub/Mirrors/archive.fedoraproject.org/fedora/linux/releases/28/Everything/source/tree/Packages/s/st-0.8.1-1.fc28.src.rpm; rpm -i st-0.8.1-1.fc28.src.rpm
+RUN cd rpmbuild/SPECS/st-simlun; rpmbuild -bb st.spec
+
+# Finally do st-simlun install for dependency checking
+RUN dnf -y install /root/rpmbuild/RPMS/x86_64/st-simlun-*.rpm
