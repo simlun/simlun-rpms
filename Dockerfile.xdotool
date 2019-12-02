@@ -1,0 +1,19 @@
+FROM centos:8
+RUN dnf -y install epel-release
+RUN dnf -y install 'dnf-command(config-manager)'
+RUN dnf config-manager --set-enabled PowerTools
+RUN dnf -y install gcc rpm-build rpm-devel rpmlint make bash diffutils patch rpmdevtools git
+
+RUN rpmdev-setuptree
+
+WORKDIR /root
+
+# List of fedora 28 mirrors at:
+# https://mirrors.fedoraproject.org/mirrorlist?repo=fedora-28&arch=x86_64
+ARG f28=https://ftp-stud.hs-esslingen.de/pub/Mirrors/archive.fedoraproject.org/fedora/linux/releases/28/Everything/source/tree/Packages/
+
+ARG xdotool=xdotool-3.20150503.1-6.fc28.src.rpm
+RUN curl -O $f28/x/$xdotool
+RUN dnf -y install $(rpm -q --requires -p $xdotool | cut -f 1 -d ' ' | grep -v rpmlib | xargs)
+RUN bash -xc "QA_RPATHS=2 rpmbuild --rebuild $xdotool"
+RUN dnf -y install /root/rpmbuild/RPMS/x86_64/xdotool*.rpm /root/rpmbuild/RPMS/x86_64/libxdo*.rpm
